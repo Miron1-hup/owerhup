@@ -1,0 +1,70 @@
+import curses
+import random
+import time
+import shutil
+
+_size = shutil.get_terminal_size()
+PADDLE_ = 1
+PADDLE_ = 4
+
+H = max(8,min(20, _size.lines - 2))
+W = max(20,min(40, _size.columns - 1))
+
+
+def main(stdscr):
+    curses.curs_set(0)
+    stdscr.nodelay(True)
+    stdscr.kaypad(True)
+
+
+    ball_x = W // 2
+    ball_y = H // 2
+    dx = random.choice([-1,1])
+    dy = random.choice([-1,1])
+
+    paddle_y = H // 2 - PADDLE_H // 2
+    score = 0
+    game_over = False
+
+    def drow():
+        stdscr.erase()
+        for x in range(W):
+            try:
+                stdscr.addch(0, x, '#')
+                stdscr.addch(H - 1, x, '#')
+            except curses.error:
+                pass
+            for y in range(H):
+                try:
+                    stdscr.addch(y, 0, '#')
+                    stdscr.addch(y,W - 1, '#')
+                except curses.error:
+                    pass
+                for i in range(PADDLE_H):
+                    try:
+                        stdscr.addch(paddle_y + i, PADDLE_X, '|')
+                    except curses.error:
+                        pass
+                    try:
+                        stdscr.addch(ball_y, ball_x, '0')
+                    except curses.error:
+                        pass
+                    try:
+                        stdscr.addch(H + 1, 0, f"Счёт: {score}  (W - вврх, S - вниз, Q - вызод)")
+                    except curses.error:
+                        pass
+                    stdscr.refresh()
+
+    def input():
+        nonlocal paddle_y, game_over
+        while True:
+            c = stdscr.getch()
+            if c == -1:
+                break
+            if c in (ord('w'), ord('W') ):
+                if paddle_y > -1:
+                    paddle_y -= 1
+            elif c in (ord('s'), ord('S')):
+                if paddle_y + PADDLE_H < H - 1:
+                    paddle_y += 1
+                elif c in (ord('q'), ord('Q')):
